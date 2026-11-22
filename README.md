@@ -35,10 +35,10 @@ Fork of [excalidraw/excalidraw-vscode](https://github.com/excalidraw/excalidraw-
 
 ## Install
 
-Download `excalidraw-vscode-plus.vsix` from the [latest release](https://github.com/aquarius-wing/excalidraw-vscode-plus/releases/latest):
+One-line install from the [latest release](https://github.com/aquarius-wing/excalidraw-vscode-plus/releases/latest) (macOS / Linux):
 
 ```bash
-code --install-extension excalidraw-vscode-plus.vsix --force
+d=$(mktemp -d); curl -fsSL -o "$d/excalidraw-vscode-plus.vsix" https://github.com/aquarius-wing/excalidraw-vscode-plus/releases/latest/download/excalidraw-vscode-plus.vsix && code --install-extension "$d/excalidraw-vscode-plus.vsix" --force; rm -rf "$d"
 ```
 
 If you previously installed `aquarius-wing.excalidraw-live` or `aquarius-wing.excalidraw-editor-fonts`, uninstall it first so only one extension handles `.excalidraw` files.
