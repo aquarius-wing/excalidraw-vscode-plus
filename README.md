@@ -6,8 +6,9 @@ Fork of [excalidraw/excalidraw-vscode](https://github.com/excalidraw/excalidraw-
 
 ### 1. Bundled CJK & Monospace Fonts
 
-- Bundles **Geist Mono** (Latin, digits, punctuation) and **Noto Sans SC** (CJK) directly inside the extension and overrides Excalidraw's default `Nunito` / `Helvetica` webfont.
-- Works offline with no local font installation needed; Chinese text, code, and numbers render crisply.
+- **Normal (`A` / `Nunito`)**: Overrides Excalidraw's default webfont with **Geist Mono** (Latin, digits, punctuation) + **Noto Sans SC** (sans-serif CJK).
+- **Two extra switchable Chinese fonts in the Font Picker**: **LXGW WenKai** (楷书/手写体, `fontFamily: 10`) and **Noto Serif SC** (宋体, `fontFamily: 11`), subsetted to all 6,763 GB2312 Simplified Chinese characters + ASCII/punctuation.
+- Works offline with no local font installation needed.
 
 ### 2. Diagrams, Code & Smart Paste
 

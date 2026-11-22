@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.15.0
+
+- add two switchable bundled Chinese fonts in Excalidraw's font picker: **LXGW WenKai** (楷体) and **Noto Serif SC** (宋体), subsetted to GB2312 (6,763 Simplified Chinese characters) + ASCII/punctuation
+
 ## 3.14.2
 
 - match custom top-right action button height and typography (`var(--lg-button-size)`, `0.75rem`) to Excalidraw's `Library` button across all screen sizes

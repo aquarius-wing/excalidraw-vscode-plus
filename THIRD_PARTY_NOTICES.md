@@ -8,6 +8,8 @@ This extension is a fork of [excalidraw/excalidraw-vscode](https://github.com/ex
 - **excalidraw-room** relay logic (re-implemented in `src/relay.ts`) - MIT, excalidraw/excalidraw-room
 - **Geist Mono** - SIL Open Font License 1.1 (below)
 - **Noto Sans SC** - SIL Open Font License 1.1 (below)
+- **LXGW WenKai Lite** (GB2312 + ASCII subset) - SIL Open Font License 1.1 (`webview/src/fonts/LXGWWenKai-OFL.txt`)
+- **Noto Serif SC** (GB2312 + ASCII subset) - SIL Open Font License 1.1 (`webview/src/fonts/NotoSerifSC-OFL.txt`)
 
 ## Geist Mono
 
