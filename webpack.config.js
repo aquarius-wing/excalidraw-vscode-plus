@@ -52,4 +52,18 @@ const config = {
   },
 };
 
-module.exports = config;
+/**@type {import('webpack').Configuration}*/
+const nodeConfig = {
+  ...config,
+  target: "node",
+  entry: "./src/extension-node.ts",
+  output: { ...config.output, filename: "extension-node.js" },
+  externals: {
+    vscode: "commonjs vscode",
+    bufferutil: "commonjs bufferutil",
+    "utf-8-validate": "commonjs utf-8-validate",
+  },
+  resolve: { extensions: [".ts", ".js"] },
+};
+
+module.exports = [config, nodeConfig];

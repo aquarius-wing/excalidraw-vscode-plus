@@ -5,6 +5,7 @@ import { Base64 } from "js-base64";
 import { ExcalidrawDocument } from "./document";
 import { languageMap } from "./lang";
 import { showEditor } from "./commands";
+import { ensureRelay } from "./relay-hook";
 
 export class ExcalidrawEditorProvider
   implements vscode.CustomEditorProvider<ExcalidrawDocument>
@@ -171,11 +172,17 @@ export class ExcalidrawEditor {
   }
 
   /** Start a new room, or join `link` when given. */
-  public startCollab(link?: string) {
+  public async startCollab(link?: string) {
     const cfg = vscode.workspace.getConfiguration("excalidraw");
+    const serverUrl = cfg.get<string>("collab.serverUrl", "http://localhost:3002");
+    const note = await ensureRelay(serverUrl);
+    if (note) {
+      if (note.startsWith("Started")) vscode.window.setStatusBarMessage(note, 4000);
+      else vscode.window.showWarningMessage(note);
+    }
     this.webview.postMessage({
       type: "collab-start",
-      serverUrl: cfg.get<string>("collab.serverUrl", "http://localhost:3002"),
+      serverUrl,
       webUrl: cfg.get<string>("collab.webUrl", "http://localhost:3001"),
       username: cfg.get<string>("collab.username") || "VS Code",
       link,

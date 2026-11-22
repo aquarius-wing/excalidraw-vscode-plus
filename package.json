@@ -3,7 +3,7 @@
     "icon": "assets/logo.png",
     "displayName": "Excalidraw (Custom Font)",
     "description": "Draw schemas in VS Code using Excalidraw",
-    "version": "3.11.0",
+    "version": "3.12.0",
     "publisher": "aquarius-wing",
     "engines": {
         "vscode": "^1.63.0"
@@ -277,6 +277,11 @@
                         "type": "string",
                         "default": "",
                         "description": "Name shown on your cursor for collaborators. Defaults to \"VS Code\"."
+                    },
+                    "excalidraw.collab.autoStartRelay": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Start an embedded local collaboration relay automatically when the relay URL points to localhost (desktop only)."
                     }
                 }
             }
@@ -430,6 +435,8 @@
     },
     "dependencies": {
         "js-base64": "^3.7.2",
-        "path-browserify": "^1.0.1"
-    }
+        "path-browserify": "^1.0.1",
+        "socket.io": "^4.8.4"
+    },
+    "main": "./dist/extension-node.js"
 }
