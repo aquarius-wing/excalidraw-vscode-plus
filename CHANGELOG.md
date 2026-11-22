@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.14.1
+
+- fix the collaboration laser-pointer toolbar island stretching to 204px (scope left properties panel `min-width` to `.App-menu_top__left .Island`)
+- keep top-right action buttons (`Copy link`, `Stop`, `Mermaid`, `Code`) on a single line
+
 ## 3.14.0
 
 - rename extension to **Excalidraw Plus** (`aquarius-wing.excalidraw-vscode-plus`)
