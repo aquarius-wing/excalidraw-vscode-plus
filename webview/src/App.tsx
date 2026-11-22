@@ -143,7 +143,7 @@ export default function App(props: {
   }, [excalidrawAPI]);
   const [mermaidOpen, setMermaidOpen] = useState(false);
   const [mermaidEditing, setMermaidEditing] = useState<
-    { mermaidId: string; source: string } | undefined
+    { mermaidId: string; source: string; frameName?: string } | undefined
   >();
 
   useEffect(() => {
@@ -203,8 +203,10 @@ export default function App(props: {
           setMermaidEditing({
             mermaidId: m.customData.mermaidId,
             source: m.customData.mermaidSource,
+            frameName: m.type === "frame" ? m.name : undefined,
           });
           setMermaidOpen(true);
+          e.preventDefault();
           e.stopPropagation();
           return;
         }

@@ -91,6 +91,18 @@ kbd {
 }
 .code-dialog h3 { margin: 0 0 4px; }
 .code-dialog-hint { margin: 0; font-size: 12px; opacity: 0.6; }
+.code-dialog-meta { margin-top: 10px; }
+.code-dialog-meta label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; }
+.code-dialog-meta input {
+  width: 240px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border-color, #ced4da);
+  background: var(--input-bg-color, #fff);
+  color: var(--text-primary-color, #1b1b1f);
+  font: inherit;
+  font-size: 13px;
+}
 .code-dialog-panels { display: flex; gap: 16px; margin-top: 12px; }
 .code-dialog-panel { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .code-dialog textarea {

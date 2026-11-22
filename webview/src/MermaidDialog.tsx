@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  CaptureUpdateAction,
-  convertToExcalidrawElements,
-  exportToCanvas,
-} from "@excalidraw/excalidraw";
+import { CaptureUpdateAction, exportToCanvas } from "@excalidraw/excalidraw";
 import type {
   BinaryFileData,
   BinaryFiles,
   ExcalidrawImperativeAPI,
 } from "@excalidraw/excalidraw/types";
 
-type Parsed = { elements: any[]; files: BinaryFiles };
+type Parsed = {
+  elements: any[];
+  files: BinaryFiles;
+  frameId: string;
+  engine: string;
+};
 
 const DEFAULT_SOURCE =
   "flowchart TD\n  A[Start] --> B{Ok?}\n  B -->|yes| C[Done]\n  B -->|no| A";
@@ -18,9 +19,10 @@ const DEFAULT_SOURCE =
 export default function MermaidDialog(props: {
   api: ExcalidrawImperativeAPI;
   onClose: () => void;
-  editing?: { mermaidId: string; source: string };
+  editing?: { mermaidId: string; source: string; frameName?: string };
 }) {
   const [source, setSource] = useState(props.editing?.source ?? DEFAULT_SOURCE);
+  const [frameTitle, setFrameTitle] = useState(props.editing?.frameName ?? "");
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const parsed = useRef<Parsed | null>(null);
@@ -40,28 +42,24 @@ export default function MermaidDialog(props: {
     let cancelled = false;
     const t = setTimeout(async () => {
       try {
-        // loaded lazily: mermaid is large
-        const { parseMermaidToExcalidraw } = await import(
-          "@excalidraw/mermaid-to-excalidraw"
-        );
-        let ret;
-        try {
-          ret = await parseMermaidToExcalidraw(source);
-        } catch {
-          ret = await parseMermaidToExcalidraw(source.replace(/"/g, "'"));
-        }
-        const elements = convertToExcalidrawElements(ret.elements, {
-          regenerateIds: true,
-        }) as any[];
-        const files = (ret.files ?? {}) as BinaryFiles;
+        const { convertMermaid } = await import("./mermaid/converter.ts");
+        const prefix = `mmd_${Date.now().toString(36)}_${Math.random()
+          .toString(36)
+          .slice(2, 6)}`;
+        const res = await convertMermaid(source, { frameTitle, prefix });
         const canvas = await exportToCanvas({
-          elements,
-          files,
-          exportPadding: 10,
+          elements: res.elements,
+          files: res.files,
+          exportPadding: 12,
           maxWidthOrHeight: 900,
         });
         if (cancelled) return;
-        parsed.current = { elements, files };
+        parsed.current = {
+          elements: res.elements,
+          files: res.files,
+          frameId: res.frameId,
+          engine: res.engine,
+        };
         previewRef.current?.replaceChildren(canvas);
         setReady(true);
         setError("");
@@ -71,12 +69,12 @@ export default function MermaidDialog(props: {
         setReady(false);
         setError((e as Error).message ?? String(e));
       }
-    }, 300);
+    }, 250);
     return () => {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [source]);
+  }, [source, frameTitle]);
 
   const insert = () => {
     const data = parsed.current;
@@ -88,19 +86,33 @@ export default function MermaidDialog(props: {
         .toString(36)
         .slice(2, 8)}`;
 
-    // all elements of one diagram share this tag; double-click finds the set
-    const tagged = data.elements.map((el) => ({
-      ...el,
-      customData: { ...el.customData, mermaidId, mermaidSource: source },
-    }));
+    // Store mermaidSource ONLY on the wrapping frame so child shapes/texts/arrows
+    // remain natively editable on double-click, while double-clicking the frame
+    // re-opens this Mermaid editor.
+    const tagged = data.elements.map((el) =>
+      el.id === data.frameId
+        ? {
+            ...el,
+            customData: { ...el.customData, mermaidId, mermaidSource: source },
+          }
+        : el
+    );
     const fileList = Object.values(data.files) as BinaryFileData[];
     if (fileList.length) api.addFiles(fileList);
 
-    // bounding box of the new diagram
-    const minX = Math.min(...tagged.map((e) => e.x));
-    const minY = Math.min(...tagged.map((e) => e.y));
-    const maxX = Math.max(...tagged.map((e) => e.x + (e.width ?? 0)));
-    const maxY = Math.max(...tagged.map((e) => e.y + (e.height ?? 0)));
+    const frameEl = tagged.find((e) => e.id === data.frameId) ?? tagged[0];
+    const minX = frameEl
+      ? frameEl.x
+      : Math.min(...tagged.map((e) => e.x));
+    const minY = frameEl
+      ? frameEl.y
+      : Math.min(...tagged.map((e) => e.y));
+    const maxX = frameEl
+      ? frameEl.x + frameEl.width
+      : Math.max(...tagged.map((e) => e.x + (e.width ?? 0)));
+    const maxY = frameEl
+      ? frameEl.y + frameEl.height
+      : Math.max(...tagged.map((e) => e.y + (e.height ?? 0)));
     const w = maxX - minX;
     const h = maxY - minY;
 
@@ -109,15 +121,32 @@ export default function MermaidDialog(props: {
     let cy: number;
     let kept = scene;
     if (props.editing) {
-      // replace in place: anchor the new diagram at the old one's center
-      const old = scene.filter(
-        (e) => !e.isDeleted && e.customData?.mermaidId === mermaidId
+      const oldFrame = scene.find(
+        (e) =>
+          !e.isDeleted &&
+          e.type === "frame" &&
+          e.customData?.mermaidId === mermaidId
       );
-      if (old.length) {
+      const oldIds = new Set(
+        scene
+          .filter(
+            (e) =>
+              !e.isDeleted &&
+              (e.id === oldFrame?.id ||
+                e.frameId === oldFrame?.id ||
+                e.customData?.mermaidId === mermaidId)
+          )
+          .map((e) => e.id)
+      );
+      const old = scene.filter((e) => oldIds.has(e.id));
+      if (oldFrame) {
+        cx = oldFrame.x + oldFrame.width / 2;
+        cy = oldFrame.y + oldFrame.height / 2;
+      } else if (old.length) {
         const ox1 = Math.min(...old.map((e) => e.x));
         const oy1 = Math.min(...old.map((e) => e.y));
-        const ox2 = Math.max(...old.map((e) => e.x + e.width));
-        const oy2 = Math.max(...old.map((e) => e.y + e.height));
+        const ox2 = Math.max(...old.map((e) => e.x + (e.width ?? 0)));
+        const oy2 = Math.max(...old.map((e) => e.y + (e.height ?? 0)));
         cx = (ox1 + ox2) / 2;
         cy = (oy1 + oy2) / 2;
       } else {
@@ -125,9 +154,9 @@ export default function MermaidDialog(props: {
         cx = -s.scrollX + s.width / 2 / s.zoom.value;
         cy = -s.scrollY + s.height / 2 / s.zoom.value;
       }
-      // soft-delete (not filter) so undo can bring the old diagram back
+      // soft-delete so undo restores the previous diagram cleanly
       kept = scene.map((e) =>
-        e.customData?.mermaidId === mermaidId && !e.isDeleted
+        oldIds.has(e.id)
           ? {
               ...e,
               isDeleted: true,
@@ -142,16 +171,14 @@ export default function MermaidDialog(props: {
       cx = -s.scrollX + s.width / 2 / s.zoom.value;
       cy = -s.scrollY + s.height / 2 / s.zoom.value;
     }
-    const dx = cx - w / 2 - minX;
-    const dy = cy - h / 2 - minY;
+    const dx = Math.round(cx - w / 2 - minX);
+    const dy = Math.round(cy - h / 2 - minY);
     const moved = tagged.map((e) => ({ ...e, x: e.x + dx, y: e.y + dy }));
 
     api.updateScene({
       elements: [...kept, ...moved],
       appState: {
-        selectedElementIds: Object.fromEntries(
-          moved.map((e) => [e.id, true as const])
-        ),
+        selectedElementIds: { [data.frameId]: true },
       },
       captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     });
@@ -170,9 +197,21 @@ export default function MermaidDialog(props: {
       >
         <h3>{props.editing ? "Edit Mermaid" : "Mermaid to Excalidraw"}</h3>
         <p className="code-dialog-hint">
-          Inserted as editable elements. Double-click the diagram later to edit
-          this source (Alt + double-click edits a single text instead).
+          Inserted as native Excalidraw components inside a frame. Double-click
+          the frame to edit Mermaid source; double-click any inner element to
+          edit it directly.
         </p>
+        <div className="code-dialog-meta">
+          <label>
+            Frame title
+            <input
+              type="text"
+              value={frameTitle}
+              placeholder="Auto (from diagram)"
+              onChange={(e) => setFrameTitle(e.target.value)}
+            />
+          </label>
+        </div>
         <div className="code-dialog-panels">
           <div className="code-dialog-panel">
             <label>Mermaid syntax</label>

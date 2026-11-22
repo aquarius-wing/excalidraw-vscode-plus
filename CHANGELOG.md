@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.16.0
+
+- Mermaid to Excalidraw now uses the local Pele layout engine (`svg-to-ir` + `ir-to-excalidraw`) to generate native Excalidraw components (flowcharts, class diagrams, ER diagrams, state diagrams, sequence diagrams) inside a frame instead of rasterized SVG images
+- double-clicking the wrapping frame re-opens the Mermaid editor, while double-clicking any element inside the frame edits it natively
+
 ## 3.15.0
 
 - add two switchable bundled Chinese fonts in Excalidraw's font picker: **LXGW WenKai** (楷体) and **Noto Serif SC** (宋体), subsetted to GB2312 (6,763 Simplified Chinese characters) + ASCII/punctuation

@@ -4,6 +4,7 @@ This extension is a fork of [excalidraw/excalidraw-vscode](https://github.com/ex
 (MIT, originally by pomdtr) and bundles the following third-party components.
 
 - **Excalidraw** (`@excalidraw/excalidraw`) - MIT
+- **Pele** (`webview/src/mermaid/pele.mjs`) - MIT, kepano (`webview/src/mermaid/LICENSE.pele`)
 - **socket.io / socket.io-client** - MIT
 - **excalidraw-room** relay logic (re-implemented in `src/relay.ts`) - MIT, excalidraw/excalidraw-room
 - **Geist Mono** - SIL Open Font License 1.1 (below)

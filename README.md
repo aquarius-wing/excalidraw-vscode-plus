@@ -12,7 +12,7 @@ Fork of [excalidraw/excalidraw-vscode](https://github.com/excalidraw/excalidraw-
 
 ### 2. Diagrams, Code & Smart Paste
 
-- **Editable Mermaid**: Insert diagrams via the **Mermaid** toolbar button; source text is stored on the elements so double-clicking re-opens the editor (`Alt + double-click` edits an individual text label).
+- **Editable Mermaid (Pele Engine)**: Insert flowcharts, class diagrams, ER diagrams, state diagrams, and sequence diagrams via the **Mermaid** toolbar button as native Excalidraw components wrapped in a frame. Double-click the frame to re-open the Mermaid editor; double-click any shape, text, or arrow inside to edit it directly.
 - **Syntax-Highlighted Code Blocks**: Insert code via the **</> Code** button (rendered with Shiki); double-clicking the block re-opens the source editor.
 - **Smart Table & Code Paste**: Paste TSV tables (Excel / Sheets / Lark) or Markdown tables directly onto the canvas as a grid of cells, or paste fenced/indented code as a monospace code box.
 - **Stable Element Links**: `Copy link to object` generates `excalidraw-element://<id>` links that scroll to and select the target element or group inside the canvas.
