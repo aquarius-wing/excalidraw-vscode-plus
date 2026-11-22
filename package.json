@@ -1,9 +1,9 @@
 {
-    "name": "excalidraw-editor-fonts",
+    "name": "excalidraw-live",
     "icon": "assets/logo.png",
-    "displayName": "Excalidraw (Custom Font)",
-    "description": "Draw schemas in VS Code using Excalidraw",
-    "version": "3.12.0",
+    "displayName": "Excalidraw Live",
+    "description": "Local-first live collaboration for Excalidraw files in VS Code. Draw together with people and AI agents, with an embedded relay and end-to-end encryption.",
+    "version": "3.13.0",
     "publisher": "aquarius-wing",
     "engines": {
         "vscode": "^1.63.0"
@@ -12,23 +12,26 @@
         "Visualization"
     ],
     "keywords": [
+        "excalidraw",
+        "collaboration",
+        "whiteboard",
+        "diagram",
         "draw",
-        "schemas",
-        "graphics",
-        "paint",
-        "excalidraw"
+        "mcp",
+        "ai",
+        "mermaid",
+        "realtime"
     ],
     "author": {
-        "name": "pomdtr",
-        "email": "achille.lacoin@gmail.com",
-        "url": "https://github.com/pomdtr"
+        "name": "aquarius-wing",
+        "url": "https://github.com/aquarius-wing"
     },
     "activationEvents": [
         "workspaceContains:**/*.{excalidraw,excalidraw.svg,excalidraw.png}"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/excalidraw/excalidraw-vscode"
+        "url": "https://github.com/aquarius-wing/excalidraw-vscode-fonts"
     },
     "browser": "./dist/extension.js",
     "contributes": {
@@ -368,7 +371,7 @@
         "customEditors": [
             {
                 "viewType": "editor.excalidraw",
-                "displayName": "Excalidraw (Custom Font)",
+                "displayName": "Excalidraw Live",
                 "priority": "default",
                 "selector": [
                     {
@@ -438,5 +441,9 @@
         "path-browserify": "^1.0.1",
         "socket.io": "^4.8.4"
     },
-    "main": "./dist/extension-node.js"
+    "main": "./dist/extension-node.js",
+    "bugs": {
+        "url": "https://github.com/aquarius-wing/excalidraw-vscode-fonts/issues"
+    },
+    "homepage": "https://github.com/aquarius-wing/excalidraw-vscode-fonts#readme"
 }
