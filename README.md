@@ -143,7 +143,7 @@ By default, the extension will use the [Visual Studio Code Display Language](htt
 
 ## Install
 
-Download `excalidraw-live.vsix` from the [latest release](https://github.com/aquarius-wing/excalidraw-vscode-fonts/releases/latest), then:
+Download `excalidraw-live.vsix` from the [latest release](https://github.com/aquarius-wing/excalidraw-live/releases/latest), then:
 
 ```bash
 code --install-extension excalidraw-live.vsix --force
