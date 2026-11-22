@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.14.2
+
+- match custom top-right action button height and typography (`var(--lg-button-size)`, `0.75rem`) to Excalidraw's `Library` button across all screen sizes
+
 ## 3.14.1
 
 - fix the collaboration laser-pointer toolbar island stretching to 204px (scope left properties panel `min-width` to `.App-menu_top__left .Island`)

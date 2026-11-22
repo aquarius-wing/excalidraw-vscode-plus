@@ -51,19 +51,25 @@ kbd {
 }
 
 /* Code to Excalidraw dialog */
-.code-dialog-trigger {
-  height: 36px;
-  padding: 0 12px;
+.excalidraw .code-dialog-trigger {
+  height: var(--lg-button-size, 2.25rem);
+  padding: 0 0.75rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius-lg, 8px);
   background: var(--island-bg-color, #fff);
   color: var(--text-primary-color, #1b1b1f);
   box-shadow: var(--shadow-island);
   cursor: pointer;
-  font: inherit;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ui-font, inherit);
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
+  line-height: 1;
   white-space: nowrap;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 .code-dialog-backdrop {
   position: fixed;
