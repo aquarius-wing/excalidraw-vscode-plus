@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.14.0
+
+- serve the bundled Excalidraw web app directly from the embedded local server on `http://localhost:3002`, so browser room links work out of the box without running a separate frontend
+- default `excalidraw.collab.webUrl` to `http://localhost:3002`
+- standalone browser mode: auto-join rooms from `#room=...`, start/copy/stop collaboration from the browser toolbar, and fit loaded scenes to viewport
+
 ## 3.13.0
 
 - rename to **Excalidraw Live** (extension id `aquarius-wing.excalidraw-live`; uninstall the old `excalidraw-editor-fonts`)

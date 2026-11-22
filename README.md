@@ -9,12 +9,12 @@ Open any `.excalidraw` file in VS Code and draw on it together with other people
 ## Live collaboration
 
 1. Open an `.excalidraw` file and click **Collaborate** (top right).
-2. A room is created, the link is copied to your clipboard, and a local relay is started if nothing is listening on `localhost:3002`.
-3. Share the link. Others join from a browser (any Excalidraw app pointed at the same relay), from another VS Code with **Excalidraw: Join Live Collaboration**, or with an AI agent.
+2. A room is created, the link (`http://localhost:3002/#room=...`) is copied to your clipboard, and the embedded local server (Socket.IO relay + local Excalidraw web page) starts automatically on `localhost:3002` if nothing is listening yet.
+3. Share the link. Anyone can open it directly in a browser (no separate frontend server needed), join from another VS Code window with **Excalidraw: Join Live Collaboration**, or join with an AI agent.
 
 Remote changes flow through the normal editor change path, so they are saved to the file you have open.
 
-The protocol is the same as excalidraw.com's (excalidraw-room relay, AES-GCM), so existing clients work. The room key lives only in the link after `#`; the relay only ever sees ciphertext. Treat the link like a password.
+The relay speaks the standard `excalidraw-room` Socket.IO protocol with end-to-end AES-GCM encryption. The room key lives only in the link after `#`; the relay only ever sees ciphertext. Treat the link like a password.
 
 ### Let an AI agent join
 
@@ -24,22 +24,22 @@ Use an MCP server that speaks the same protocol, for example [`excalidraw-room-m
 npx -y excalidraw-room-mcp
 ```
 
-Then ask the agent to join the room link, passing the relay URL and the web origin (names are those of version 0.8.x):
+Then ask the agent to join the room link, passing the local server URL:
 
 ```
-join_room  link=<room link>  serverUrl=http://localhost:3002  origin=http://localhost:3001
+join_room  link=<room link>  serverUrl=http://localhost:3002  origin=http://localhost:3002
 ```
 
-Set `EXCALIDRAW_FIREBASE_PROJECT` and `EXCALIDRAW_FIREBASE_API_KEY` to dummy values if you do not want the MCP server to save scenes to excalidraw.com's public storage.
+Set `EXCALIDRAW_FIREBASE_PROJECT` and `EXCALIDRAW_FIREBASE_API_KEY` to dummy values if you do not want the MCP server to save scenes to external storage.
 
 ### Settings
 
 | Setting | Default | Meaning |
 |---|---|---|
 | `excalidraw.collab.serverUrl` | `http://localhost:3002` | Relay (Socket.IO) to connect to |
-| `excalidraw.collab.webUrl` | `http://localhost:3001` | Origin used when building room links |
+| `excalidraw.collab.webUrl` | `http://localhost:3002` | Origin used when building room links (defaults to the embedded web server) |
 | `excalidraw.collab.username` | `VS Code` | Name shown on your cursor |
-| `excalidraw.collab.autoStartRelay` | `true` | Start an embedded relay when the URL is localhost (desktop only) |
+| `excalidraw.collab.autoStartRelay` | `true` | Start the embedded local server (relay + web app) when the URL is localhost (desktop only) |
 
 ### Limits
 

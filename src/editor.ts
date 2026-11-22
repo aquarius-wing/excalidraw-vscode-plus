@@ -39,8 +39,7 @@ export class ExcalidrawEditorProvider
         JSON.stringify({
           type: "excalidrawlib",
           version: 2,
-          source:
-            "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+          source: "https://github.com/aquarius-wing/excalidraw-live",
           libraryItems,
         })
       )
@@ -183,7 +182,7 @@ export class ExcalidrawEditor {
     this.webview.postMessage({
       type: "collab-start",
       serverUrl,
-      webUrl: cfg.get<string>("collab.webUrl", "http://localhost:3001"),
+      webUrl: cfg.get<string>("collab.webUrl", "http://localhost:3002"),
       username: cfg.get<string>("collab.username") || "VS Code",
       link,
     });

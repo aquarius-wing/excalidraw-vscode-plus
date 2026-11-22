@@ -8,7 +8,7 @@ import ReactDOM from "react-dom";
 import { Base64 } from "js-base64";
 
 import App from "./App";
-import { sendChangesToVSCode, vscode } from "./vscode.ts";
+import { isVSCode, sendChangesToVSCode, vscode } from "./vscode.ts";
 import {
   AppState,
   BinaryFiles,
@@ -122,7 +122,8 @@ async function main() {
       }, 250);
     };
 
-    const isDirty = !initialData || config.contentType != initialContentType;
+    const isDirty =
+      !config.browserMode && (!initialData || config.contentType != initialContentType);
     ReactDOM.render(
       <React.StrictMode>
         <App
@@ -135,7 +136,7 @@ async function main() {
           theme={config.theme}
           onChange={debouncedOnChange(
             sendChanges,
-            isDirty ? -1 : hashElementsVersion(initialData.elements || [])
+            isDirty || !initialData ? -1 : hashElementsVersion(initialData.elements || [])
           )}
           imageParams={config.imageParams}
           langCode={config.langCode}
@@ -145,10 +146,14 @@ async function main() {
       rootElement
     );
   } catch (error) {
-    vscode.postMessage({
-      type: "error",
-      content: `Failed to load Document: ${error}`,
-    });
+    if (isVSCode) {
+      vscode.postMessage({
+        type: "error",
+        content: `Failed to load Document: ${error}`,
+      });
+    } else {
+      console.error("Failed to load Document:", error);
+    }
   }
 }
 

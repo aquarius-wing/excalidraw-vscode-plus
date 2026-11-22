@@ -237,6 +237,7 @@ export class Collab {
     switch (msg.type) {
       case "SCENE_INIT":
       case "SCENE_UPDATE": {
+        const wasEmpty = api.getSceneElements().length === 0;
         const remote = restoreElements(msg.payload.elements as any, null);
         const merged = reconcileElements(
           api.getSceneElementsIncludingDeleted() as any,
@@ -252,6 +253,10 @@ export class Collab {
         if (msg.type === "SCENE_INIT" && !this.initialized) {
           this.initialized = true;
           this.setStatus({ state: "connected" });
+          if (wasEmpty) {
+            const live = merged.filter((e: any) => !e.isDeleted);
+            if (live.length) api.scrollToContent(live, { fitToViewport: true });
+          }
           // push anything we had locally that the room does not know yet
           this.onLocalChange(merged);
         }

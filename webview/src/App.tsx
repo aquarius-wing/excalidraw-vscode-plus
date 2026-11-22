@@ -16,7 +16,7 @@ import {
   ExcalidrawInitialDataState,
   LibraryItems,
 } from "@excalidraw/excalidraw/types";
-import { vscode } from "./vscode.ts";
+import { isVSCode, vscode } from "./vscode.ts";
 import { insertTable, parseClipboardTable } from "./pasteTable.ts";
 import { insertCode, parseClipboardCode } from "./pasteCode.ts";
 import CodeDialog from "./CodeDialog.tsx";
@@ -108,6 +108,7 @@ export default function App(props: {
     peers: 0,
     state: "idle",
   });
+  const [copied, setCopied] = useState(false);
   const apiRef = useRef<ExcalidrawImperativeAPI>();
   apiRef.current = excalidrawAPI;
   const collabRef = useRef<Collab>();
@@ -116,12 +117,30 @@ export default function App(props: {
       () => apiRef.current,
       (st) => {
         setCollabStatus(st);
-        vscode.postMessage({ type: "collab-status", status: st });
+        if (isVSCode) {
+          vscode.postMessage({ type: "collab-status", status: st });
+        }
       }
     );
   }
   const collab = collabRef.current;
   useEffect(() => () => collab.stop(), []);
+
+  useEffect(() => {
+    if (isVSCode || !excalidrawAPI) return;
+    const joinFromHash = () => {
+      if (!window.location.hash.includes("room=")) return;
+      collab.start({
+        serverUrl: window.location.origin,
+        webUrl: window.location.origin,
+        username: "Browser",
+        link: window.location.href,
+      });
+    };
+    joinFromHash();
+    window.addEventListener("hashchange", joinFromHash);
+    return () => window.removeEventListener("hashchange", joinFromHash);
+  }, [excalidrawAPI]);
   const [mermaidOpen, setMermaidOpen] = useState(false);
   const [mermaidEditing, setMermaidEditing] = useState<
     { mermaidId: string; source: string } | undefined
@@ -276,7 +295,7 @@ export default function App(props: {
         excalidrawAPI={(api) => setExcalidrawAPI(api)}
         UIOptions={{
           canvasActions: {
-            loadScene: false,
+            loadScene: !isVSCode,
             saveToActiveFile: false,
           },
         }}
@@ -289,17 +308,32 @@ export default function App(props: {
                   <button
                     className="code-dialog-trigger"
                     title={collabStatus.error ?? "Copy the room link"}
-                    onClick={() =>
-                      vscode.postMessage({ type: "collab-copy", link: collabStatus.link })
-                    }
+                    onClick={() => {
+                      if (isVSCode) {
+                        vscode.postMessage({ type: "collab-copy", link: collabStatus.link });
+                      } else if (collabStatus.link) {
+                        navigator.clipboard?.writeText(collabStatus.link).catch(() => {});
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 1500);
+                      }
+                    }}
                   >
                     {collabStatus.state === "error" ? "⚠ " : "● "}
-                    {collabStatus.peers} · Copy link
+                    {collabStatus.peers} · {copied ? "Copied" : "Copy link"}
                   </button>
                   <button
                     className="code-dialog-trigger"
                     title="Stop collaborating"
-                    onClick={() => collab.stop()}
+                    onClick={() => {
+                      collab.stop();
+                      if (!isVSCode && window.location.hash.includes("room=")) {
+                        window.history.replaceState(
+                          null,
+                          "",
+                          window.location.pathname + window.location.search
+                        );
+                      }
+                    }}
                   >
                     Stop
                   </button>
@@ -308,7 +342,22 @@ export default function App(props: {
                 <button
                   className="code-dialog-trigger"
                   title="Start a live collaboration room"
-                  onClick={() => vscode.postMessage({ type: "collab-request-start" })}
+                  onClick={async () => {
+                    if (isVSCode) {
+                      vscode.postMessage({ type: "collab-request-start" });
+                      return;
+                    }
+                    await collab.start({
+                      serverUrl: window.location.origin,
+                      webUrl: window.location.origin,
+                      username: "Browser",
+                    });
+                    const link = collab.getLink();
+                    if (link) {
+                      window.history.replaceState(null, "", link);
+                      navigator.clipboard?.writeText(link).catch(() => {});
+                    }
+                  }}
                 >
                   Collaborate
                 </button>
@@ -347,7 +396,7 @@ export default function App(props: {
           libraryItems: props.libraryItems,
           scrollToContent: true,
         }}
-        libraryReturnUrl={"vscode://pomdtr.excalidraw-editor/importLib"}
+        libraryReturnUrl={"vscode://aquarius-wing.excalidraw-live/importLib"}
         onChange={(elements, appState, files) => {
           collab.onLocalChange(elements);
           props.onChange(
@@ -387,10 +436,14 @@ export default function App(props: {
             });
             return;
           }
-          vscode.postMessage({
-            type: "link-open",
-            url: element.link,
-          });
+          if (isVSCode) {
+            vscode.postMessage({
+              type: "link-open",
+              url: element.link,
+            });
+          } else if (element.link) {
+            window.open(element.link, "_blank", "noopener,noreferrer");
+          }
           event.preventDefault();
         }}
         onLibraryChange={(libraryItems) => {

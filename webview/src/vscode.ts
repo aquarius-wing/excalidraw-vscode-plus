@@ -5,8 +5,12 @@ import {
 } from "@excalidraw/excalidraw";
 import { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 
-// @ts-ignore
-export const vscode = acquireVsCodeApi();
+declare function acquireVsCodeApi(): { postMessage(msg: any): void };
+
+export const isVSCode = typeof acquireVsCodeApi === "function";
+export const vscode = isVSCode
+  ? acquireVsCodeApi()
+  : { postMessage: (_msg: any) => {} };
 
 const textEncoder = new TextEncoder();
 
@@ -74,6 +78,9 @@ const json2VSCode = (
 };
 
 export const sendChangesToVSCode = (contentType: string) => {
+  if (!isVSCode) {
+    return () => {};
+  }
   if (contentType === "image/svg+xml") {
     return svg2VSCode;
   }

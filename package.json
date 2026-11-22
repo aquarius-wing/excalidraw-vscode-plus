@@ -3,7 +3,7 @@
     "icon": "assets/logo.png",
     "displayName": "Excalidraw Live",
     "description": "Local-first live collaboration for Excalidraw files in VS Code. Draw together with people and AI agents, with an embedded relay and end-to-end encryption.",
-    "version": "3.13.0",
+    "version": "3.14.0",
     "publisher": "aquarius-wing",
     "engines": {
         "vscode": "^1.63.0"
@@ -273,8 +273,8 @@
                     },
                     "excalidraw.collab.webUrl": {
                         "type": "string",
-                        "default": "http://localhost:3001",
-                        "description": "Excalidraw web app origin used when building shareable room links."
+                        "default": "http://localhost:3002",
+                        "description": "Origin used when building shareable room links. Defaults to the embedded local web server."
                     },
                     "excalidraw.collab.username": {
                         "type": "string",
@@ -284,7 +284,7 @@
                     "excalidraw.collab.autoStartRelay": {
                         "type": "boolean",
                         "default": true,
-                        "description": "Start an embedded local collaboration relay automatically when the relay URL points to localhost (desktop only)."
+                        "description": "Start an embedded local collaboration server (relay + web app) automatically when the relay URL points to localhost (desktop only)."
                     }
                 }
             }
