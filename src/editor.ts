@@ -39,7 +39,7 @@ export class ExcalidrawEditorProvider
         JSON.stringify({
           type: "excalidrawlib",
           version: 2,
-          source: "https://github.com/aquarius-wing/excalidraw-live",
+          source: "https://github.com/aquarius-wing/excalidraw-vscode-plus",
           libraryItems,
         })
       )

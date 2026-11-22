@@ -396,7 +396,7 @@ export default function App(props: {
           libraryItems: props.libraryItems,
           scrollToContent: true,
         }}
-        libraryReturnUrl={"vscode://aquarius-wing.excalidraw-live/importLib"}
+        libraryReturnUrl={"vscode://aquarius-wing.excalidraw-vscode-plus/importLib"}
         onChange={(elements, appState, files) => {
           collab.onLocalChange(elements);
           props.onChange(

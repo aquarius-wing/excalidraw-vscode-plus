@@ -1,8 +1,8 @@
 {
-    "name": "excalidraw-live",
+    "name": "excalidraw-vscode-plus",
     "icon": "assets/logo.png",
-    "displayName": "Excalidraw Live",
-    "description": "Local-first live collaboration for Excalidraw files in VS Code. Draw together with people and AI agents, with an embedded relay and end-to-end encryption.",
+    "displayName": "Excalidraw Plus",
+    "description": "Enhanced Excalidraw for VS Code: bundled Geist Mono + Noto Sans SC fonts, editable Mermaid & code blocks, smart table paste, and pure-local live collaboration.",
     "version": "3.14.0",
     "publisher": "aquarius-wing",
     "engines": {
@@ -31,7 +31,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/aquarius-wing/excalidraw-live"
+        "url": "https://github.com/aquarius-wing/excalidraw-vscode-plus"
     },
     "browser": "./dist/extension.js",
     "contributes": {
@@ -371,7 +371,7 @@
         "customEditors": [
             {
                 "viewType": "editor.excalidraw",
-                "displayName": "Excalidraw Live",
+                "displayName": "Excalidraw Plus",
                 "priority": "default",
                 "selector": [
                     {
@@ -443,7 +443,7 @@
     },
     "main": "./dist/extension-node.js",
     "bugs": {
-        "url": "https://github.com/aquarius-wing/excalidraw-live/issues"
+        "url": "https://github.com/aquarius-wing/excalidraw-vscode-plus/issues"
     },
-    "homepage": "https://github.com/aquarius-wing/excalidraw-live#readme"
+    "homepage": "https://github.com/aquarius-wing/excalidraw-vscode-plus#readme"
 }

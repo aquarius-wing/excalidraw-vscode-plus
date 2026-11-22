@@ -52,7 +52,7 @@ function buildBrowserIndexHtml(template: string): string {
     content: [],
     contentType: "application/json",
     theme: "light",
-    name: "Excalidraw Live",
+    name: "Excalidraw Plus",
     browserMode: true,
   };
   const b64Config = Buffer.from(JSON.stringify(config), "utf8").toString("base64");
