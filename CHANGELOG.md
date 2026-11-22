@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.16.1
+
+- preserve Mermaid `classDef` / `style` colors (`fill`, `stroke`, `stroke-width`, `color`) and `note` styling from Pele SVG into native Excalidraw elements
+- switch default unstyled Pele node palette from forced blue to clean neutral so custom `classDef` highlights stand out clearly in both light and dark modes
+
 ## 3.16.0
 
 - Mermaid to Excalidraw now uses the local Pele layout engine (`svg-to-ir` + `ir-to-excalidraw`) to generate native Excalidraw components (flowcharts, class diagrams, ER diagrams, state diagrams, sequence diagrams) inside a frame instead of rasterized SVG images

@@ -318,10 +318,70 @@ function bboxFromPoints(pts) {
   return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
+function parseStyleDecl(styleStr) {
+  const out = {};
+  if (!styleStr) return out;
+  for (const part of styleStr.split(";")) {
+    const idx = part.indexOf(":");
+    if (idx === -1) continue;
+    const k = part.slice(0, idx).trim().toLowerCase();
+    const v = part.slice(idx + 1).trim();
+    if (k && v) out[k] = v;
+  }
+  return out;
+}
+
+function concreteColor(val) {
+  if (!val) return null;
+  const v = val.trim();
+  if (!v || v.startsWith("var(") || v === "none" || v === "transparent" || v === "inherit" || v === "currentColor") {
+    return null;
+  }
+  return v;
+}
+
+function extractElStyle(el) {
+  if (!el) return {};
+  const css = parseStyleDecl(el.attrs?.style);
+  const fill = concreteColor(css.fill ?? el.attrs?.fill);
+  const stroke = concreteColor(css.stroke ?? el.attrs?.stroke);
+  const strokeWidthRaw = css["stroke-width"] ?? el.attrs?.["stroke-width"];
+  const strokeWidth = strokeWidthRaw ? parseFloat(strokeWidthRaw) : null;
+  const strokeDasharray = css["stroke-dasharray"] ?? el.attrs?.["stroke-dasharray"] ?? null;
+  return {
+    ...(fill ? { fill } : {}),
+    ...(stroke ? { stroke } : {}),
+    ...(Number.isFinite(strokeWidth) ? { strokeWidth } : {}),
+    ...(strokeDasharray && strokeDasharray !== "none" ? { dashed: true } : {}),
+  };
+}
+
+function extractNodeStyle(nodeEl) {
+  const primary =
+    nodeEl.children.find(c => c.tag === "rect" && c.attrs.width && c.attrs.height) ||
+    nodeEl.children.find(c => c.tag === "circle") ||
+    nodeEl.children.find(c => c.tag === "polygon") ||
+    nodeEl.children.find(c => c.tag === "path" && !hasClass(c, "pele-divider") && !hasClass(c, "pele-er-divider"));
+  const style = extractElStyle(primary);
+
+  let textColor = null;
+  walk(nodeEl, 0, 0, (el) => {
+    if (textColor || el.tag !== "text") return;
+    if (hasClass(el, "pele-label") || hasClass(el, "pele-member") || hasClass(el, "pele-attribute") || hasClass(el, "pele-method")) {
+      const css = parseStyleDecl(el.attrs?.style);
+      const c = concreteColor(css.fill ?? css.color ?? el.attrs?.fill);
+      if (c) textColor = c;
+    }
+  });
+  if (textColor) style.textColor = textColor;
+  return Object.keys(style).length ? style : undefined;
+}
+
 function extractNodeGeometry(nodeEl, tx, ty) {
   const classes = (nodeEl.attrs?.class || "").split(/\s+/);
   let shape = "rect";
-  if (classes.includes("pele-shape-diam")) shape = "diamond";
+  if (classes.includes("pele-note")) shape = "note";
+  else if (classes.includes("pele-shape-diam")) shape = "diamond";
   else if (classes.includes("pele-shape-cyl")) shape = "cylinder";
   else if (classes.includes("pele-shape-circle") || classes.includes("pele-shape-double-circle")) shape = "ellipse";
   else if (classes.includes("pele-shape-stadium") || classes.includes("pele-shape-round")) shape = "round";
@@ -483,13 +543,19 @@ export function mermaidToLayoutIR(source, options = {}) {
     const rect = el.children.find(c => c.tag === "rect");
     const lbl = el.children.find(c => hasClass(c, "pele-cluster-label"));
     if (!rect) continue;
+    const cStyle = extractElStyle(rect);
+    if (lbl) {
+      const lc = concreteColor(parseStyleDecl(lbl.attrs?.style).fill ?? lbl.attrs?.fill);
+      if (lc) cStyle.textColor = lc;
+    }
     clusters.push({
       id: el.attrs["data-id"] || `cluster_${clusters.length}`,
       label: lbl ? collectText(lbl).trim() : "",
       x: +(tx + (parseFloat(rect.attrs.x) || 0)).toFixed(2),
       y: +(ty + (parseFloat(rect.attrs.y) || 0)).toFixed(2),
       w: +parseFloat(rect.attrs.width || "0").toFixed(2),
-      h: +parseFloat(rect.attrs.height || "0").toFixed(2)
+      h: +parseFloat(rect.attrs.height || "0").toFixed(2),
+      ...(Object.keys(cStyle).length ? { style: cStyle } : {})
     });
   }
 
@@ -499,7 +565,8 @@ export function mermaidToLayoutIR(source, options = {}) {
     const geom = extractNodeGeometry(el, tx, ty);
     const dividers = extractDividers(el, ty);
     const content = extractNodeContent(el);
-    nodes.push({ id, ...geom, dividers, ...content });
+    const style = extractNodeStyle(el);
+    nodes.push({ id, ...geom, dividers, ...content, ...(style ? { style } : {}) });
   }
 
   // Edge labels indexed by data-id
@@ -815,7 +882,8 @@ export function mermaidToLayoutIR(source, options = {}) {
 
     const sem = semanticEdges.get(id) || {};
     const label = edgeLabelMap.get(id) || (sem.text ? { text: sem.text } : null);
-    const dashed = Boolean(mainPath.attrs["stroke-dasharray"] || sem.dashed);
+    const edgeStyle = extractElStyle(mainPath);
+    const dashed = Boolean(mainPath.attrs["stroke-dasharray"] || edgeStyle.dashed || sem.dashed);
     const markers = el.children.filter(c => hasClass(c, "pele-marker"));
 
     let arrowStart = sem.arrowStart ?? null;
@@ -848,7 +916,8 @@ export function mermaidToLayoutIR(source, options = {}) {
       dashed,
       arrowStart,
       arrowEnd,
-      label
+      label,
+      ...(Object.keys(edgeStyle).length ? { style: edgeStyle } : {})
     });
   }
 

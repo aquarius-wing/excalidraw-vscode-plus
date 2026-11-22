@@ -16,7 +16,8 @@ const PALETTES = {
   indigo: { stroke: "#3b5bdb", bg: "#edf2ff", hdr: "#dbe4ff", text: "#364fc7" },
   gray:   { stroke: "#495057", bg: "#f1f3f5", hdr: "#e9ecef", text: "#212529" },
   red:    { stroke: "#e03131", bg: "#fff5f5", hdr: "#ffe3e3", text: "#c92a2a" },
-  white:  { stroke: "#495057", bg: "#ffffff", hdr: "#f8f9fa", text: "#212529" }
+  white:  { stroke: "#495057", bg: "#ffffff", hdr: "#f8f9fa", text: "#212529" },
+  neutral:{ stroke: "#6c757d", bg: "#f8f9fa", hdr: "#e9ecef", text: "#212529" }
 };
 
 function sanitizeId(s) {
@@ -151,9 +152,11 @@ function compileClassOrEntityNode(elems, node, x, y, w, h, pal, skin, frameId, s
   const hasDividers = Array.isArray(node.dividers) && node.dividers.length > 0;
   const firstDivY = hasDividers ? (node.dividers[0] - node.y) * scale : Math.min(46, Math.round(h * 0.34));
 
+  const strokeWidth = node.style?.strokeWidth || 2;
   const card = baseProps(idBase, "rectangle", x, y, w, h, frameId, seedRef, {
     strokeColor: pal.stroke,
-    backgroundColor: "#ffffff",
+    strokeWidth,
+    backgroundColor: node.style?.fill ? pal.bg : "#ffffff",
     roundness: null,
     groupIds: [gid]
   });
@@ -161,6 +164,7 @@ function compileClassOrEntityNode(elems, node, x, y, w, h, pal, skin, frameId, s
 
   elems.push(baseProps(idBase + "_hdr", "rectangle", x, y, w, firstDivY, frameId, seedRef, {
     strokeColor: pal.stroke,
+    strokeWidth,
     backgroundColor: pal.hdr,
     roundness: null,
     groupIds: [gid]
@@ -174,11 +178,12 @@ function compileClassOrEntityNode(elems, node, x, y, w, h, pal, skin, frameId, s
     groupIds: [gid]
   }));
 
+  const bodyTextColor = node.style?.textColor || "#212529";
   if (node.shape === "class") {
     const secondDivY = node.dividers.length > 1 ? (node.dividers[1] - node.y) * scale : firstDivY + Math.round((h - firstDivY) * 0.48);
     if (node.attributes.length > 0) {
       elems.push(makeText(idBase + "_attr", x + 10, y + firstDivY + 7, w - 20, Math.max(20, secondDivY - firstDivY - 12), node.attributes.join("\n"), frameId, seedRef, {
-        strokeColor: "#212529", fontSize: 12.5, groupIds: [gid]
+        strokeColor: bodyTextColor, fontSize: 12.5, groupIds: [gid]
       }));
     }
     if (node.dividers.length > 1) {
@@ -195,7 +200,7 @@ function compileClassOrEntityNode(elems, node, x, y, w, h, pal, skin, frameId, s
     const rowsText = node.erRows.length > 0 ? node.erRows.join("\n") : "";
     if (rowsText) {
       elems.push(makeText(idBase + "_rows", x + 10, y + firstDivY + 7, w - 20, Math.max(20, h - firstDivY - 12), rowsText, frameId, seedRef, {
-        strokeColor: "#212529", fontSize: 12.5, groupIds: [gid]
+        strokeColor: bodyTextColor, fontSize: 12.5, groupIds: [gid]
       }));
     }
   }
@@ -217,11 +222,13 @@ function compileStandardNode(elems, node, x, y, w, h, pal, skin, frameId, seedRe
     roundness = null;
   }
 
+  const strokeStyle = skin.borderStyle || (node.style?.dashed ? "dashed" : node.shape === "note" ? "dashed" : "solid");
   const shapeEl = baseProps(idBase, exType, x, y, w, h, frameId, seedRef, {
     strokeColor: pal.stroke,
+    strokeWidth: node.style?.strokeWidth || (node.shape === "note" ? 1.5 : 2),
     backgroundColor: pal.bg,
-    strokeStyle: skin.borderStyle || "solid",
-    roundness,
+    strokeStyle,
+    roundness: node.shape === "note" ? { type: 3 } : roundness,
     groupIds: [gid]
   });
   elems.push(shapeEl);
@@ -256,7 +263,7 @@ function compileStandardNode(elems, node, x, y, w, h, pal, skin, frameId, seedRe
   const padX = stereo === "component" ? 12 : 8;
   const badgeReserve = stereo === "component" ? 18 : 0;
   elems.push(makeText(idBase + "_lbl", x + padX, ty, Math.max(30, w - padX * 2 - badgeReserve), textH, displayLabel, frameId, seedRef, {
-    strokeColor: "#212529",
+    strokeColor: node.style?.textColor || pal.text || "#212529",
     fontSize: 13.5,
     textAlign: stereo === "component" ? "left" : "center",
     groupIds: [gid]
@@ -312,7 +319,15 @@ export function compileLayoutToExcalidraw(ir, opts = {}) {
   // 1) Clusters / subgraphs
   for (const c of ir.clusters) {
     const cSkin = clusterSkins[c.id] || {};
-    const pal = resolvePalette(cSkin.palette, cSkin.stereotype === "boundary" ? "red" : "gray");
+    const basePal = resolvePalette(cSkin.palette, cSkin.stereotype === "boundary" ? "red" : "gray");
+    const pal = c.style && !cSkin.palette
+      ? {
+          stroke: c.style.stroke || basePal.stroke,
+          bg: c.style.fill || basePal.bg,
+          hdr: c.style.fill || basePal.hdr,
+          text: c.style.textColor || basePal.text
+        }
+      : basePal;
     const cx = contentOx + c.x * scale;
     const cy = contentOy + c.y * scale;
     const cw = c.w * scale;
@@ -322,7 +337,7 @@ export function compileLayoutToExcalidraw(ir, opts = {}) {
     elems.push(baseProps(cid, "rectangle", cx, cy, cw, ch, frameId, seedRef, {
       strokeColor: pal.stroke,
       backgroundColor: pal.bg,
-      strokeWidth: 1.5,
+      strokeWidth: c.style?.strokeWidth || 1.5,
       strokeStyle: "dashed",
       opacity: cSkin.opacity ?? 65,
       roundness: { type: 3 }
@@ -339,7 +354,16 @@ export function compileLayoutToExcalidraw(ir, opts = {}) {
   const nodeShapeById = new Map();
   for (const node of ir.nodes) {
     const nSkin = nodeSkins[node.id] || {};
-    const pal = resolvePalette(nSkin.palette, skinRoot.defaultPalette || "blue");
+    const defaultPal = node.shape === "note" ? "amber" : (skinRoot.defaultPalette || "neutral");
+    const basePal = resolvePalette(nSkin.palette, defaultPal);
+    const pal = node.style && !nSkin.palette
+      ? {
+          stroke: node.style.stroke || basePal.stroke,
+          bg: node.style.fill || basePal.bg,
+          hdr: node.style.fill || basePal.hdr,
+          text: node.style.textColor || basePal.text
+        }
+      : basePal;
     const nx = contentOx + node.x * scale;
     const ny = contentOy + node.y * scale;
     const nw = Math.max(nSkin.minWidth || 0, node.w * scale);
@@ -361,7 +385,7 @@ export function compileLayoutToExcalidraw(ir, opts = {}) {
   for (const edge of ir.edges) {
     const eSkin = edgeSkins[edge.id] || edgeSkins[edge.from + "->" + edge.to] || {};
     const pal = resolvePalette(eSkin.palette, "gray");
-    const strokeColor = eSkin.color || (eSkin.palette ? pal.stroke : "#495057");
+    const strokeColor = eSkin.color || edge.style?.stroke || (eSkin.palette ? pal.stroke : "#495057");
 
     const absPts = edge.points.map(([px, py]) => [
       Math.round(contentOx + px * scale),
