@@ -1,25 +1,61 @@
-# Excalidraw
+# Excalidraw Live
 
-This extension integrates Excalidraw into VS Code.
-To use it, create an empty file with a `.excalidraw`, `.excalidraw.json`, `.excalidraw.svg` or `.excalidraw.png` extension and open it in Visual Studio Code.
+Open any `.excalidraw` file in VS Code and draw on it together with other people or an AI agent. One click starts a room, a local relay starts by itself, and everything is end-to-end encrypted.
 
-Try the web version at : <https://excalidraw.com/>
+> A fork of [excalidraw/excalidraw-vscode](https://github.com/excalidraw/excalidraw-vscode) (MIT), which itself builds on pomdtr's `excalidraw-editor`. Not affiliated with the Excalidraw project.
 
 ![demo](./medias/screenshot.png)
 
-- [Features](#features)
-  - [Edit Images](#edit-images)
-  - [Draw from your browser](#draw-from-your-browser)
-  - [Switch Editor Theme](#switch-editor-theme)
-  - [Import Public Library](#import-public-library)
-  - [View Drawing Source](#view-drawing-source)
-  - [Associate Additional Extensions with the Excalidraw Editor](#associate-additional-extensions-with-the-excalidraw-editor)
-  - [Sharing your Library](#sharing-your-library)
-  - [Configure Language](#configure-language)
-- [Contact](#contact)
-- [Note for Contributors](#note-for-contributors)
+## Live collaboration
 
-## Features
+1. Open an `.excalidraw` file and click **Collaborate** (top right).
+2. A room is created, the link is copied to your clipboard, and a local relay is started if nothing is listening on `localhost:3002`.
+3. Share the link. Others join from a browser (any Excalidraw app pointed at the same relay), from another VS Code with **Excalidraw: Join Live Collaboration**, or with an AI agent.
+
+Remote changes flow through the normal editor change path, so they are saved to the file you have open.
+
+The protocol is the same as excalidraw.com's (excalidraw-room relay, AES-GCM), so existing clients work. The room key lives only in the link after `#`; the relay only ever sees ciphertext. Treat the link like a password.
+
+### Let an AI agent join
+
+Use an MCP server that speaks the same protocol, for example [`excalidraw-room-mcp`](https://github.com/bjcoombs/excalidraw-room-mcp):
+
+```bash
+npx -y excalidraw-room-mcp
+```
+
+Then ask the agent to join the room link, passing the relay URL and the web origin (names are those of version 0.8.x):
+
+```
+join_room  link=<room link>  serverUrl=http://localhost:3002  origin=http://localhost:3001
+```
+
+Set `EXCALIDRAW_FIREBASE_PROJECT` and `EXCALIDRAW_FIREBASE_API_KEY` to dummy values if you do not want the MCP server to save scenes to excalidraw.com's public storage.
+
+### Settings
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `excalidraw.collab.serverUrl` | `http://localhost:3002` | Relay (Socket.IO) to connect to |
+| `excalidraw.collab.webUrl` | `http://localhost:3001` | Origin used when building room links |
+| `excalidraw.collab.username` | `VS Code` | Name shown on your cursor |
+| `excalidraw.collab.autoStartRelay` | `true` | Start an embedded relay when the URL is localhost (desktop only) |
+
+### Limits
+
+- The embedded relay runs inside the VS Code window that started it. Closing that window stops it; clicking Collaborate in another window starts it again.
+- Only elements are synced, not image files.
+- The relay keeps no state: the scene lives in the connected clients and in your file.
+
+## Also in this fork
+
+- **Custom fonts**: Geist Mono (Latin) and Noto Sans SC (CJK) replace the hand-drawn font.
+- **Mermaid to Excalidraw**, editable after insertion.
+- **Code to Excalidraw** with syntax highlighting.
+- **Paste tables** from Excel / Sheets or Markdown as a grid.
+- **Copy link to object** with stable `excalidraw-element://` links.
+
+## Inherited from upstream
 
 ### Edit Images
 
@@ -105,14 +141,16 @@ By default, the extension will use the [Visual Studio Code Display Language](htt
 }
 ```
 
-## Contact
+## Install
 
-Only bug reports / feature requests specifics to the VS Code integration should go to the extension repository. If it is not the case, please report your issue directly to the Excalidraw project.
+Download `excalidraw-live.vsix` from the [latest release](https://github.com/aquarius-wing/excalidraw-vscode-fonts/releases/latest), then:
 
-## Note for Contributors
+```bash
+code --install-extension excalidraw-live.vsix --force
+```
 
-Thank you for considering contributing to the extension :sparkling_heart: !
+If you had the old `aquarius-wing.excalidraw-editor-fonts` installed, uninstall it first so only one editor handles `.excalidraw` files.
 
-This extension only goal is to integrate Excalidraw to the Visual Studio Code ecosystem. Users should be able to use both the website and the extension with a minimal amount of friction. As such, we will not accept any contribution that significantly modify the user experience compared to the Excalidraw website.
+## License
 
-There are exceptions to this rule (for example, the switch theme icon was deported to Visual Studio Code editor toolbar to allow a better integration). In case of uncertainty, create a thread in the project [Discussion Page](https://github.com/excalidraw/excalidraw-vscode/discussions).
+MIT, see [LICENSE](./LICENSE). Bundled fonts are under the SIL OFL, see [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).

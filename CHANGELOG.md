@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.13.0
+
+- rename to **Excalidraw Live** (extension id `aquarius-wing.excalidraw-live`; uninstall the old `excalidraw-editor-fonts`)
+- new README, third-party notices for bundled fonts
+
+## 3.12.0
+
+- embedded local collaboration relay, started on demand when the relay URL is localhost (desktop only)
+- new setting `excalidraw.collab.autoStartRelay`
+
+## 3.11.0
+
+- live collaboration compatible with the excalidraw-room protocol (E2E encrypted)
+- Collaborate / Copy link / Stop buttons, status bar item, `Excalidraw: Start / Join / Copy / Stop Live Collaboration`
+- settings `excalidraw.collab.serverUrl`, `webUrl`, `username`
+
+## 3.10.0
+
+- custom fonts, editable Mermaid import, code to Excalidraw, table paste, element links (fork additions)
+
 ## 3.9.0
 
 - add support for linking to local files
