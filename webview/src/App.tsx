@@ -19,6 +19,7 @@ import {
 import { isVSCode, vscode } from "./vscode.ts";
 import { insertTable, parseClipboardTable } from "./pasteTable.ts";
 import { insertCode, parseClipboardCode } from "./pasteCode.ts";
+import { insertNsd, parseClipboardNsd } from "./pasteNsd.ts";
 import CodeDialog from "./CodeDialog.tsx";
 import MermaidDialog from "./MermaidDialog.tsx";
 import { Collab, CollabStatus } from "./collab.ts";
@@ -169,13 +170,16 @@ export default function App(props: {
       }
       const text = e.clipboardData?.getData("text/plain");
       if (!text) return;
-      // code first: tab-indented code would otherwise look like a TSV table
-      const code = parseClipboardCode(text);
-      const table = code ? null : parseClipboardTable(text);
-      if (!code && !table) return;
+      // N-S diagram first: it starts with an explicit `nsd` header line
+      const nsd = parseClipboardNsd(text);
+      // code next: tab-indented code would otherwise look like a TSV table
+      const code = nsd ? null : parseClipboardCode(text);
+      const table = nsd || code ? null : parseClipboardTable(text);
+      if (!nsd && !code && !table) return;
       e.preventDefault();
       e.stopPropagation(); // keep Excalidraw's own paste handler from running
-      if (code) insertCode(excalidrawAPI, code);
+      if (nsd) insertNsd(excalidrawAPI, nsd);
+      else if (code) insertCode(excalidrawAPI, code);
       else if (table) insertTable(excalidrawAPI, table);
     };
     document.addEventListener("paste", onPaste, true);

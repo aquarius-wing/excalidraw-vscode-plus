@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.17.0
+
+- paste an indented text starting with `nsd` to get an N-S (Nassi–Shneiderman) structured diagram: plain lines are sequence boxes, `if cond ?` with `yes:` / `no:` is a triangle decision box, `loop title` with indented children is an indented loop box
+
 ## 3.16.1
 
 - preserve Mermaid `classDef` / `style` colors (`fill`, `stroke`, `stroke-width`, `color`) and `note` styling from Pele SVG into native Excalidraw elements

@@ -3,7 +3,7 @@
     "icon": "assets/logo.png",
     "displayName": "Excalidraw Plus",
     "description": "Enhanced Excalidraw for VS Code: bundled Geist Mono + Noto Sans SC fonts, editable Mermaid & code blocks, smart table paste, and pure-local live collaboration.",
-    "version": "3.16.1",
+    "version": "3.17.0",
     "publisher": "aquarius-wing",
     "engines": {
         "vscode": "^1.63.0"
