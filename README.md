@@ -15,7 +15,7 @@ Fork of [excalidraw/excalidraw-vscode](https://github.com/excalidraw/excalidraw-
 - **Editable Mermaid (Pele Engine)**: Insert flowcharts, class diagrams, ER diagrams, state diagrams, and sequence diagrams via the **Mermaid** toolbar button as native Excalidraw components wrapped in a frame. Double-click the frame to re-open the Mermaid editor; double-click any shape, text, or arrow inside to edit it directly.
 - **Syntax-Highlighted Code Blocks**: Insert code via the **</> Code** button (rendered with Shiki); double-clicking the block re-opens the source editor.
 - **Smart Table & Code Paste**: Paste TSV tables (Excel / Sheets / Lark) or Markdown tables directly onto the canvas as a grid of cells, or paste fenced/indented code as a monospace code box.
-- **N-S Diagram Paste**: Paste text starting with an `nsd` line to get a Nassi–Shneiderman structure diagram. Plain lines become stacked boxes; `if condition ?` followed by indented `yes:` / `no:` sections becomes a triangle decision box; `loop title` with indented children becomes an indented loop box.
+- **N-S Diagram Paste**: Paste text starting with an `nsd` line onto the canvas, or into the **Mermaid** dialog, to get a Nassi–Shneiderman structure diagram. Plain lines become stacked boxes; `if condition ?` followed by indented `yes:` / `no:` sections becomes a triangle decision box; `loop title` with indented children becomes an indented loop box.
   ```
   nsd Plan
   Step 0: compute max

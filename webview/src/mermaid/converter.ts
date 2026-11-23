@@ -5,6 +5,7 @@ import {
 import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { mermaidToLayoutIR } from "./svg-to-ir.mjs";
 import { compileLayoutToExcalidraw } from "./ir-to-excalidraw.mjs";
+import { layoutNsd, parseClipboardNsd } from "../pasteNsd.ts";
 
 export type MermaidConvertResult = {
   elements: any[];
@@ -75,6 +76,22 @@ export async function convertMermaid(
     opts.prefix ??
     `mmd_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
   const frameName = defaultFrameTitle(source, opts.frameTitle);
+
+  // N-S diagram: source starts with an `nsd` line (not Mermaid syntax).
+  const nsd = parseClipboardNsd(source.replace(/^(\s*\n)+/, ""));
+  if (nsd) {
+    const nsdFrame = opts.frameTitle?.trim() || nsd.title || "N-S diagram";
+    const laid = layoutNsd({ ...nsd, title: "" }, 0, 0).els;
+    const built = convertToExcalidrawElements(laid as any) as any[];
+    const wrapped = wrapInFrame(built, prefix, nsdFrame);
+    return {
+      elements: wrapped.elements,
+      files: {},
+      frameId: wrapped.frameId,
+      frameName: nsdFrame,
+      engine: "pele",
+    };
+  }
 
   let peleErr: unknown;
   try {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.17.1
+
+- the **Mermaid** dialog now accepts `nsd` text too (live preview, inserted inside an editable frame; double-click the frame to edit the source). Previously pasting `nsd` there failed with "No diagram type detected for the given text."
+
 ## 3.17.0
 
 - paste an indented text starting with `nsd` to get an N-S (Nassi–Shneiderman) structured diagram: plain lines are sequence boxes, `if cond ?` with `yes:` / `no:` is a triangle decision box, `loop title` with indented children is an indented loop box
